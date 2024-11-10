@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Chat App</title>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 20px; 
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f2f5;  /* Light gray background */
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 800px;  /* Limit maximum width */
+            height: 80vh;      /* Take 80% of viewport height */
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;  /* Keep children inside rounded corners */
+        }
+
+        #chat-screen {
+            display: none;  /* Hidden by default */
+            flex: 1;
+            flex-direction: column;
+            position: relative;
+            height: 100%;  /* Take full height */
+        }
+
+        #messages { 
+            flex: 1;
+            overflow-y: auto;  /* Enable vertical scrolling */
+            margin: 0; 
+            padding: 20px;
+            list-style-type: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Add padding to handle last message visibility */
+        #messages::after {
+            content: '';
+            padding-bottom: 70px;  
+        }
+
+        #messages li { 
+            padding: 12px; 
+            background: #f1f1f1;
+            border-radius: 12px;
+            max-width: 70%;
+            width: fit-content;
+            clear: both;
+            float: left;
+            position: relative;
+            padding-bottom: 25px;  /* Space for username */
+            margin-right: auto;
+        }
+        #messages li.own-message {
+            float: right;
+            background: #e3f2fd;
+            margin-left: auto;
+            margin-right: 0;
+        }
+        .message-username {
+            position: absolute;
+            bottom: 4px;
+            left: 12px;
+            font-size: 0.8em;
+            color: #666;
+        }
+        .message-text {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            display: block;
+            margin-bottom: 5px;
+        }
+        #form { 
+            position: absolute;  /* Changed to absolute within chat-screen */
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex; 
+            gap: 10px;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+        #input { 
+            flex-grow: 1; 
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+        }
+        #input:focus {
+            border-color: #4CAF50;
+        }
+        button { 
+            padding: 12px 24px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        #username-input {
+            width: 100%;
+            max-width: 300px;       /* Limit input width */
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        /* Handle message overflow */
+        .message-text {
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div id="login-screen">
+            <input id="username-input" placeholder="Enter your username..." />
+            <button id="join-chat">Join Chat</button>
+        </div>
+
+        <div id="chat-screen">
+            <ul id="messages"></ul>
+            <form id="form">
+                <input id="input" autocomplete="off" placeholder="Type your message..."/>
+                <button>Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const form = document.getElementById('form');
+        const input = document.getElementById('input');
+        const messages = document.getElementById('messages');
+        const loginScreen = document.getElementById('login-screen');
+        const chatScreen = document.getElementById('chat-screen');
+        const usernameInput = document.getElementById('username-input');
+        const joinButton = document.getElementById('join-chat');
+        
+        let username = '';
+
+        // Initially hide chat screen
+        chatScreen.style.display = 'none';
+
+        joinButton.addEventListener('click', () => {
+            if (usernameInput.value.trim()) {
+                username = usernameInput.value.trim();
+                loginScreen.style.display = 'none';
+                chatScreen.style.display = 'flex';
+            }
+        });
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (input.value && username) {
+                socket.emit('chat message', {
+                    username: username,
+                    message: input.value
+                });
+                input.value = '';
+            }
+        });
+
+        input.addEventListener('keypress', (e) => {
+            if (!username) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        socket.on('chat message', (data) => {
+            const li = document.createElement('li');
+            const messageText = document.createElement('span');
+            const usernameSpan = document.createElement('span');
+            
+            messageText.classList.add('message-text');
+            messageText.textContent = data.message;
+            
+            usernameSpan.classList.add('message-username');
+            usernameSpan.textContent = data.username;
+            
+            if (data.username === username) {
+                li.classList.add('own-message');
+            }
+            
+            li.appendChild(messageText);
+            li.appendChild(usernameSpan);
+            messages.appendChild(li);
+            
+            // Scroll to the latest message
+            messages.scrollTop = messages.scrollHeight;
+        });
+    </script>
+</body>
+</html> 
