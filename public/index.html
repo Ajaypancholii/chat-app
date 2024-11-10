@@ -1,43 +1,56 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Simple Chat App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { 
-            margin: 0; 
-            padding: 20px; 
+        body {
+            margin: 0;
+            padding: 10px;
             font-family: Arial, sans-serif;
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #f0f2f5;  /* Light gray background */
+            background-color: #f0f2f5;
         }
 
         .chat-container {
             width: 100%;
-            max-width: 800px;  /* Limit maximum width */
-            height: 80vh;      /* Take 80% of viewport height */
+            max-width: 800px;
+            height: 95vh;
             background: white;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
-            overflow: hidden;  /* Keep children inside rounded corners */
+            overflow: hidden;
+        }
+
+        .app-header {
+            padding: 15px 20px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 12px 12px 0 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         #chat-screen {
-            display: none;  /* Hidden by default */
+            display: none;
             flex: 1;
             flex-direction: column;
             position: relative;
-            height: 100%;  /* Take full height */
+            height: calc(100% - 60px);
         }
 
-        #messages { 
+        #messages {
             flex: 1;
-            overflow-y: auto;  /* Enable vertical scrolling */
-            margin: 0; 
+            overflow-y: auto;
+            margin: 0;
             padding: 20px;
             list-style-type: none;
             display: flex;
@@ -45,76 +58,89 @@
             gap: 10px;
         }
 
-        /* Add padding to handle last message visibility */
         #messages::after {
             content: '';
-            padding-bottom: 70px;  
+            padding-bottom: 70px;
         }
 
-        #messages li { 
-            padding: 12px; 
-            background: #f1f1f1;
+        #messages li {
+            padding: 12px;
+            background: var(--message-other);
             border-radius: 12px;
-            max-width: 70%;
+            max-width: 85%;
             width: fit-content;
             clear: both;
             float: left;
             position: relative;
-            padding-bottom: 25px;  /* Space for username */
+            padding-bottom: 25px;
             margin-right: auto;
         }
+
         #messages li.own-message {
             float: right;
-            background: #e3f2fd;
+            background: var(--message-own);
             margin-left: auto;
             margin-right: 0;
         }
+
         .message-username {
             position: absolute;
             bottom: 4px;
             left: 12px;
-            font-size: 0.8em;
+            font-size: 0.7em;
             color: #666;
+            max-width: calc(100% - 24px);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
+
         .message-text {
             white-space: pre-wrap;
             word-wrap: break-word;
             display: block;
             margin-bottom: 5px;
         }
-        #form { 
-            position: absolute;  /* Changed to absolute within chat-screen */
+
+        #form {
+            position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            display: flex; 
-            gap: 10px;
-            padding: 20px;
+            display: flex;
+            gap: 8px;
+            padding: 10px;
             background: white;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
         }
-        #input { 
-            flex-grow: 1; 
-            padding: 12px;
+
+        #input {
+            flex-grow: 1;
+            padding: 10px;
             border: 1px solid #ddd;
             border-radius: 8px;
             outline: none;
         }
+
         #input:focus {
-            border-color: #4CAF50;
+            border-color: var(--primary-color);
         }
-        button { 
+
+        button {
             padding: 12px 24px;
-            background: #4CAF50;
+            background: var(--primary-color);
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
+            white-space: nowrap;
         }
+
         button:hover {
-            background: #45a049;
+            background: var(--primary-dark);
         }
+
         #login-screen {
             display: flex;
             flex-direction: column;
@@ -126,22 +152,190 @@
 
         #username-input {
             width: 100%;
-            max-width: 300px;       /* Limit input width */
-            padding: 12px;
+            max-width: 300px;
+            padding: 10px;
             border: 1px solid #ddd;
             border-radius: 8px;
             outline: none;
         }
 
-        /* Handle message overflow */
         .message-text {
             word-break: break-word;
             white-space: pre-wrap;
         }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0;
+            }
+
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            #messages {
+                padding: 10px 15px;
+            }
+
+            #messages li {
+                max-width: 90%;
+                padding: 12px;
+                padding-bottom: 25px;
+                margin-bottom: 8px;
+            }
+
+            .message-username {
+                font-size: 0.7em;
+                bottom: 6px;
+                left: 12px;
+            }
+
+            #form {
+                padding: 8px;
+                gap: 8px;
+            }
+
+            #input,
+            #username-input {
+                padding: 10px;
+            }
+
+            button {
+                padding: 10px 15px;
+            }
+        }
+
+        /* Mobile-specific styles */
+        @media (max-width: 480px) {
+            body {
+                padding: 0;
+            }
+
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            #messages {
+                padding: 10px 15px;
+                /* Horizontal padding for messages container */
+            }
+
+            #messages li {
+                max-width: 90%;
+                padding: 12px;
+                padding-bottom: 25px;
+                margin-bottom: 8px;
+                /* Space between messages */
+            }
+
+            /* Add space after the last message */
+            #messages::after {
+                content: '';
+                padding-bottom: 70px;
+            }
+
+            /* Message spacing */
+            .message-text {
+                margin-bottom: 8px;
+                line-height: 1.4;
+                /* Better readability */
+            }
+
+            .message-username {
+                font-size: 0.7em;
+                bottom: 6px;
+                left: 12px;
+            }
+
+            #messages li.own-message .message-username {
+                right: 12px;
+            }
+
+            /* Input form adjustments */
+            #form {
+                padding: 12px;
+                gap: 10px;
+                background: white;
+                box-shadow: 0 -2px 10px rgba(233, 30, 99, 0.1);
+            }
+
+            #input {
+                padding: 12px;
+                border-radius: 20px;
+                /* Rounded input field */
+                margin: 0;
+            }
+
+            button {
+                padding: 12px 20px;
+                border-radius: 20px;
+                /* Rounded button */
+            }
+
+            /* Login screen adjustments */
+            #login-screen {
+                padding: 20px;
+            }
+
+            #username-input {
+                padding: 12px;
+                margin-bottom: 10px;
+                border-radius: 20px;
+            }
+        }
+
+        /* Additional spacing for larger phones */
+        @media (min-width: 375px) and (max-width: 480px) {
+            #messages {
+                padding: 15px 20px;
+            }
+
+            #messages li {
+                margin-bottom: 10px;
+            }
+        }
+
+        /* Theme color variables */
+        :root {
+            --primary-color: #e91e63;       /* Pink */
+            --primary-dark: #c2185b;        /* Darker pink for hover */
+            --message-own: #fce4ec;         /* Light pink for own messages */
+            --message-other: #f5f5f5;       /* Light gray for other messages */
+        }
+
+        .app-header {
+            padding: 15px 20px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 12px 12px 0 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 480px) {
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .app-header {
+                border-radius: 0;  /* Remove border radius on mobile */
+                padding: 12px 20px;
+            }
+        }
     </style>
 </head>
+
 <body>
     <div class="chat-container">
+        <div class="app-header">
+            iChat </div>
+
         <div id="login-screen">
             <input id="username-input" placeholder="Enter your username..." />
             <button id="join-chat">Join Chat</button>
@@ -150,7 +344,7 @@
         <div id="chat-screen">
             <ul id="messages"></ul>
             <form id="form">
-                <input id="input" autocomplete="off" placeholder="Type your message..."/>
+                <input id="input" autocomplete="off" placeholder="Type your message..." />
                 <button>Send</button>
             </form>
         </div>
@@ -166,10 +360,9 @@
         const chatScreen = document.getElementById('chat-screen');
         const usernameInput = document.getElementById('username-input');
         const joinButton = document.getElementById('join-chat');
-        
+
         let username = '';
 
-        // Initially hide chat screen
         chatScreen.style.display = 'none';
 
         joinButton.addEventListener('click', () => {
@@ -202,24 +395,24 @@
             const li = document.createElement('li');
             const messageText = document.createElement('span');
             const usernameSpan = document.createElement('span');
-            
+
             messageText.classList.add('message-text');
             messageText.textContent = data.message;
-            
+
             usernameSpan.classList.add('message-username');
             usernameSpan.textContent = data.username;
-            
+
             if (data.username === username) {
                 li.classList.add('own-message');
             }
-            
+
             li.appendChild(messageText);
             li.appendChild(usernameSpan);
             messages.appendChild(li);
-            
-            // Scroll to the latest message
+
             messages.scrollTop = messages.scrollHeight;
         });
     </script>
 </body>
-</html> 
+
+</html>
